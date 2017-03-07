@@ -6,10 +6,11 @@
 Follow below instructions to run and test the codes used in the paper
 
 ## 0. Shapenet dataset download
-You should have ShapeNetCore.v1 dataset in your local $(SHAPENET_DATA) directory via [shapenet.org](https://shapenet.org/) in your local directory. Once you downloaded, let's make softlinks to them.
+You should have ShapeNetCore.v1 dataset in your local $(SHAPENET_DATA) directory via [shapenet.org](https://shapenet.org/) in your local directory. We will use entire models for car category. For chair category, we used train/test split suggested by appearance flow network paper[[link]](https://github.com/tinghuiz/appearance-flow)(They picked the models that have rich textures).
 ```bash
+$(tvsn_root)/tvsn/data$>./make_new_chair.sh $(SHAPENET_DATA)
 $(tvsn_root)/tvsn/data$>ln -s $(SHAPENET_DATA)/02958343 ./car
-$(tvsn_root)/tvsn/data$>ln -s $(SHAPENET_DATA)/03001627 ./chair
+$(tvsn_root)/tvsn/data$>ln -s $(SHAPENET_DATA)/new_chair ./chair
 ```
 
 ## 1. Dataset Preparation (Rendering multiple view images)
@@ -69,7 +70,7 @@ $(tvsn_root)/gen_vis_maps/MatlabEXR$> mex exrinfo.cpp -lIlmImf -lIex -lImath -lH
 $(tvsn_root)/gen_vis_maps/MatlabEXR$> mex exrread.cpp -lIlmImf -lIex -lImath -lHalf -I/usr/include/OpenEXR/
 $(tvsn_root)/gen_vis_maps/MatlabEXR$> mex exrwrite.cpp -lIlmImf -lIex -lImath -lHalf -I/usr/include/OpenEXR/
 ```
-Once you have exrread library, you can run the script we provided, it will save visibility maps in 'tvsn/data' directory, e.g. 'tvsn/data/maps_car.t7'
+Once you have exrread library, you can run the script we provided, it will save visibility maps in '$(tvsn_root)/tvsn/data' directory, e.g. '$(tvsn_root)/tvsn/data/maps_car.t7'
 ```bash
 $(tvsn_root)/gen_vis_maps$>./gen_vis_maps.sh $(SHAPENET_DATA)/02958343 car
 $(tvsn_root)/gen_vis_maps$>./gen_vis_maps.sh $(SHAPENET_DATA)/03001627 chair
