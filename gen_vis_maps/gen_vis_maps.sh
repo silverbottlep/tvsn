@@ -1,7 +1,7 @@
 #!/bin/bash
 #[examples]
 # ./gen_vis_maps.sh $(SHAPENET_DATA)/02958343 car
-# ./gen_vis_maps.sh $(SHAPENET_DATA)/03001627 chair
+# ./gen_vis_maps.sh $(SHAPENET_DATA)/new_chair chair
 # ./gen_vis_maps.sh $(SHAPENET_DATA)/03790512 motorcycle
 # ./gen_vis_maps.sh $(SHAPENET_DATA)/03991062 flowerpot
 

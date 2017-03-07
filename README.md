@@ -73,11 +73,9 @@ $(tvsn_root)/gen_vis_maps/MatlabEXR$> mex exrwrite.cpp -lIlmImf -lIex -lImath -l
 Once you have exrread library, you can run the script we provided, it will save visibility maps in '$(tvsn_root)/tvsn/data' directory, e.g. '$(tvsn_root)/tvsn/data/maps_car.t7'
 ```bash
 $(tvsn_root)/gen_vis_maps$>./gen_vis_maps.sh $(SHAPENET_DATA)/02958343 car
-$(tvsn_root)/gen_vis_maps$>./gen_vis_maps.sh $(SHAPENET_DATA)/03001627 chair
-$(tvsn_root)/gen_vis_maps$>./gen_vis_maps.sh $(SHAPENET_DATA)/03790512 motorcycle
-$(tvsn_root)/gen_vis_maps$>./gen_vis_maps.sh $(SHAPENET_DATA)/03991062 flowerpot
+$(tvsn_root)/gen_vis_maps$>./gen_vis_maps.sh $(SHAPENET_DATA)/new_chair chair
 $(tvsn_root)/gen_vis_maps$>ls ../tvsn/data/
-maps_car.t7  maps_chair.t7 maps_motorcycle.t7 maps_flowerpot.t7
+maps_car.t7  maps_chair.t7
 ```
 Rendering images and computing visibility maps are time consuming jobs, so I highly recommend you to parallelize it across multiple cpus. It can be easily done by modifying the code or splitting the data into different directories.
 
