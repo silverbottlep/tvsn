@@ -3,7 +3,7 @@
 
 [[Paper]](http://www.cs.unc.edu/~eunbyung/tvsn/) [[Project Homepage]](http://www.cs.unc.edu/~eunbyung/tvsn/)
 
-Follow below instructions to run and test the codes used in the paper
+Follow below instructions to run and test the codes used in the paper.
 
 ## 0. ShapeNet dataset download
 You should have ShapeNetCore.v1 dataset in your local $(SHAPENET_DATA) directory via [shapenet.org](https://shapenet.org/) in your local directory. We will use entire models for car category. For chair category, we used train/test split suggested by appearance flow network paper[[link]](https://github.com/tinghuiz/appearance-flow)(They picked the models that have rich textures).
