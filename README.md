@@ -5,7 +5,7 @@
 
 Follow below instructions to run and test the codes used in the paper
 
-## 0. Shapenet dataset download
+## 0. ShapeNet dataset download
 You should have ShapeNetCore.v1 dataset in your local $(SHAPENET_DATA) directory via [shapenet.org](https://shapenet.org/) in your local directory. We will use entire models for car category. For chair category, we used train/test split suggested by appearance flow network paper[[link]](https://github.com/tinghuiz/appearance-flow)(They picked the models that have rich textures).
 ```bash
 $(tvsn_root)/tvsn/data$>./make_new_chair.sh $(SHAPENET_DATA)
@@ -60,7 +60,13 @@ $(tvsn_root)/ObjRenderer$> ls ($SHAPENET_DATA)/02958343/56c80ed5da821cd017900545
 ```
 
 ## 2. Dataset Preparation (Generating visibility maps)
-Now, we are going to make visibility maps. First we need to have simple library for reading .exr file. You can download and install from [here](http://www.mit.edu/~kimo/software/matlabexr/). You also need to have matlab and torch installed.
+Now, we are going to make visibility maps.  For convinience, we provide precomputed visibilty maps. You can download them from following links, and locate them in $(tvsn_root)/tvsn/data directory
+
+[maps_car.t7](https://drive.google.com/open?id=0B-r7apOz1BHAVEI1RURZYUl4Tlk) (~26G)
+
+[maps_chair.t7](https://drive.google.com/open?id=0B-r7apOz1BHANGlsY1k3Z29yVEU) (~2G)
+
+You can also run the code to compute visibility maps. First we need to have simple library for reading .exr file. You can download and install from [here](http://www.mit.edu/~kimo/software/matlabexr/). You also need to have matlab and torch installed.
 ```bash
 $(tvsn_root)$> cd gen_vis_maps
 $(tvsn_root)/gen_vis_maps$> wget http://www.mit.edu/~kimo/software/matlabexr/MatlabEXR.zip
@@ -70,7 +76,7 @@ $(tvsn_root)/gen_vis_maps/MatlabEXR$> mex exrinfo.cpp -lIlmImf -lIex -lImath -lH
 $(tvsn_root)/gen_vis_maps/MatlabEXR$> mex exrread.cpp -lIlmImf -lIex -lImath -lHalf -I/usr/include/OpenEXR/
 $(tvsn_root)/gen_vis_maps/MatlabEXR$> mex exrwrite.cpp -lIlmImf -lIex -lImath -lHalf -I/usr/include/OpenEXR/
 ```
-Once you have exrread library, you can run the script we provided, it will save visibility maps in '$(tvsn_root)/tvsn/data' directory, e.g. '$(tvsn_root)/tvsn/data/maps_car.t7'
+Once you have exrread library, you can run the script we provide, it will save visibility maps in '$(tvsn_root)/tvsn/data' directory, e.g. '$(tvsn_root)/tvsn/data/maps_car.t7'
 ```bash
 $(tvsn_root)/gen_vis_maps$>./gen_vis_maps.sh $(SHAPENET_DATA)/02958343 car
 $(tvsn_root)/gen_vis_maps$>./gen_vis_maps.sh $(SHAPENET_DATA)/new_chair chair
@@ -93,3 +99,21 @@ Now, you can train!
 ```bash
 $(tvsn_root)/tvsn/code$>./script_train_tvsn.sh
 ```
+
+## 5. Downloading pretrained models
+We provide pretrained models for car and chair category. You can download it from following links.
+
+[tvsn_car_epoch220.t7](https://drive.google.com/open?id=0B-r7apOz1BHAQVVXR0JXcTh5MUk) (~134M)
+
+[tvsn_chair_epoch200.t7](https://drive.google.com/open?id=0B-r7apOz1BHAWmQtdEZ6ZG5udW8) (~134M)
+
+[doafn_car_epoch200.t7](https://drive.google.com/open?id=0B-r7apOz1BHAR1RKWXM1c1NBekk) (~351M)
+
+[doafn_chair_epoch200.t7](https://drive.google.com/open?id=0B-r7apOz1BHAaWh4N1Vnc3hKdE0)(~351M)
+
+
+## 6. Testing TVSN
+```bash
+$(tvsn_root)/tvsn/code/$>th test_tvsn.lua --category car --doafn_path ../snapshots/pretrained/doafn_car_epoch200.t7 --tvsn_path ../snapshots/pretrained/tvsn_car_epoch220.t7
+```
+You will get some of qualitative results in $(tvsn_root)/tvsn/code/result_car directory.

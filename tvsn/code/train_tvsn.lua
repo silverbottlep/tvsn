@@ -51,9 +51,8 @@ torch.manualSeed(opt.manualSeed)
 torch.setnumthreads(opt.nThreads)
 torch.setdefaulttensortype('torch.FloatTensor')
 
-opt.modelName = string.format('%s_%s_%s_bs%03d_lambda1%.01f_lambda2%.04f_lr%.6f_iterG%d_tvw%0.06f', 
-		opt.modelString, opt.imgscale, opt.category, opt.batchSize, opt.lambda1, opt.lambda2, opt.lr, opt.iterG, opt.tv_weight)
-opt.doafnName = string.format('DOAFN_SYM_256_%s_bs025',opt.category)
+opt.modelName = string.format('%s_%s_%s_bs%03d', opt.modelString, opt.imgscale, opt.category, opt.batchSize)
+opt.doafnName = string.format('DOAFN_SYM_%s_%s_bs025',opt.imgscale, opt.category)
 opt.modelPath = opt.modelDir .. opt.modelName
 if not paths.dirp(opt.modelPath) then
   paths.mkdir(opt.modelPath)
