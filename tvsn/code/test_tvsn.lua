@@ -10,6 +10,7 @@ require 'nngraph'
 require 'gnuplot'
 require 'stn'
 require 'lfs'
+assert(loadfile("image_error_measures.lua"))(true)
 local ffi = require 'ffi'
 
 torch.setdefaulttensortype('torch.FloatTensor')
@@ -23,7 +24,7 @@ opt = lapp[[
 	--doafn_path				(default '../snapshots/pretrained/doafn_car_epoch200.t7')
 	--tvsn_path					(default '../snapshots/pretrained/tvsn_car_epoch220.t7')
   --category          (default 'car')
-  --plot							(default 1)
+  --plot							(default 0)
 	-d, --debug					(default 0)
 ]]
 
@@ -74,17 +75,17 @@ end
 
 local transforms = {20,40,60,80,100,120,140,160,180,200,220,240,260,280,300,320,340}
 
-local n_batch = 25
+local n_batch = 15
 
-local batch_im_in = torch.Tensor(n_batch,3,opt.imgscale,opt.imgscale)
-local batch_im_out = torch.Tensor(n_batch,3,opt.imgscale,opt.imgscale)
-local batch_im_out_alpha = torch.Tensor(15,3,opt.imgscale,opt.imgscale)
-local batch_view_in_doafn = torch.Tensor(n_batch,17)
-local batch_doafn_out_masked = torch.Tensor(n_batch, 3, opt.imgscale, opt.imgscale)
-local batch_doafn_feat = torch.Tensor(n_batch, 512, 4, 4)
+local batch_im_in = torch.Tensor(25,3,opt.imgscale,opt.imgscale)
+local batch_im_out = torch.Tensor(25,3,opt.imgscale,opt.imgscale)
+local batch_im_out_alpha = torch.Tensor(n_batch,3,opt.imgscale,opt.imgscale)
+local batch_view_in_doafn = torch.Tensor(25,17)
+local batch_doafn_out_masked = torch.Tensor(25, 3, opt.imgscale, opt.imgscale)
+local batch_doafn_feat = torch.Tensor(25, 512, 4, 4)
 local mean_pixel = torch.Tensor({103.939,116.779,123.68})
 mean_pixel = mean_pixel:view(3,1,1):expandAs(torch.Tensor(3,opt.imgscale,opt.imgscale))
-mean_pixel = torch.repeatTensor(mean_pixel,n_batch,1,1,1)
+mean_pixel = torch.repeatTensor(mean_pixel,25,1,1,1)
 
 if opt.gpu >= 0 then
 	batch_im_in = batch_im_in:cuda()
@@ -102,11 +103,9 @@ end
 print('testing...')
 N = metadata.n_test
 
-local test_output_l1 = torch.Tensor(n_samples,8)
-local test_output_l2 = torch.Tensor(n_samples,8)
-local test_output_ssim = torch.Tensor(n_samples,8)
+local test_output_l1 = torch.Tensor(n_samples,2)
+local test_output_ssim = torch.Tensor(n_samples,2)
 
---for i=1,1500,15 do
 for i=1,n_samples,15 do
 	collectgarbage()
 	print('processing ' .. i)
@@ -160,15 +159,15 @@ for i=1,n_samples,15 do
 
 	-- [-1,1] -> [0, 2] -> mask -> [-1, 1]
 	batch_doafn_out_masked:copy(doafn_f[1]):add(1)
-	for j=1,15 do
+	for j=1,n_batch do
 		batch_doafn_out_masked[j]:cmul(doafn_f[2][j]:repeatTensor(3,1,1))
 	end
 	batch_doafn_out_masked:add(-1)
 	
-	local input1 = batch_doafn_out_masked[{{1,15},{},{},{}}]
-	local input2 = batch_doafn_feat[{{1,15},{},{},{}}]
-	local input3 = batch_view_in_doafn[{{1,15},{}}]
-	local input4 = mean_pixel[{{1,15},{},{},{}}]
+	local input1 = batch_doafn_out_masked[{{1,n_batch},{},{},{}}]
+	local input2 = batch_doafn_feat[{{1,n_batch},{},{},{}}]
+	local input3 = batch_view_in_doafn[{{1,n_batch},{}}]
+	local input4 = mean_pixel[{{1,n_batch},{},{},{}}]
 	comp_dcgan_per:forward({input1, input2, input3, input4})
 	local comp_dcgan_per_f = comp_dcgan_per.forwardnodes[comp_dcgan_per_out_idx].data.module.output:clone()
 	comp_dcgan_per_f = comp_dcgan_per_f:index(2,torch.LongTensor{3,2,1})
@@ -182,7 +181,7 @@ for i=1,n_samples,15 do
 	if opt.plot==1 then
 		local to_plot={}
 		local nrow = 6
-		for j=1,15 do
+		for j=1,n_batch do
 			to_plot[(j-1)*nrow + 1] = batch_im_in[j]:clone()
 			to_plot[(j-1)*nrow + 2] = batch_im_out[j]:clone()
 			to_plot[(j-1)*nrow + 3] = doafn_f[1][j]:clone()
@@ -194,38 +193,31 @@ for i=1,n_samples,15 do
 		image.save(opt.expPath .. string.format('/test%03d.jpg',i), formatted)
 	end
 
---  batch_im_in[{{1,15},{},{},{}}]:cmul(batch_im_out_alpha)
---  batch_im_out[{{1,15},{},{},{}}]:cmul(batch_im_out_alpha)
---	doafn_f[1][{{1,15},{},{},{}}]:cmul(batch_im_out_alpha)
---	comp_dcgan_per_f[{{1,15},{},{},{}}]:cmul(batch_im_out_alpha)
---	
---	-- measure the similarity
---	for k=1,15 do
---		local idx = (i-1) + k
---		local n_fg = batch_im_out_alpha[{{k},{1},{},{}}]:sum()
---		local l1_err = torch.Tensor(8):fill(0)
---		local l2_err = torch.Tensor(8):fill(0)
---		local ssim = torch.Tensor(8):fill(0)
---
---		l1_err[2] = criterion_l1:forward(doafn_f[1][k], batch_im_out[k])/(3*n_fg)
---		l1_err[8] = criterion_l1:forward(comp_dcgan_per_f[k], batch_im_out[k])/(3*n_fg)
---	
-----		ssim[1] = SSIM(s2m_f[k]:float(), batch_im_out[k]:float())
-----		ssim[2] = SSIM(doafn_f[1][k]:float(), batch_im_out[k]:float())
-----		ssim[3] = SSIM(per_f[k]:float(), batch_im_out[k]:float())
-----		ssim[4] = SSIM(dcgan_f[k]:float(), batch_im_out[k]:float())
-----		ssim[5] = SSIM(dcgan_per_f[k]:float(), batch_im_out[k]:float())
-----		ssim[6] = SSIM(two_column_f[k]:float(), batch_im_out[k]:float())
-----		ssim[8] = SSIM(comp_dcgan_per_f[k]:float(), batch_im_out[k]:float())
---
---		test_output_l1[idx]:copy(l1_err)
---		test_output_l2[idx]:copy(l2_err)
---		test_output_ssim[idx]:copy(ssim)
---	end
+  batch_im_in[{{1,n_batch},{},{},{}}]:cmul(batch_im_out_alpha)
+  batch_im_out[{{1,n_batch},{},{},{}}]:cmul(batch_im_out_alpha)
+	doafn_f[1][{{1,n_batch},{},{},{}}]:cmul(batch_im_out_alpha)
+	comp_dcgan_per_f[{{1,n_batch},{},{},{}}]:cmul(batch_im_out_alpha)
+	
+	-- measure the similarity
+	for k=1,n_batch do
+		local idx = (i-1) + k
+		local n_fg = batch_im_out_alpha[{{k},{1},{},{}}]:sum()
+		local l1_err = torch.Tensor(2):fill(0)
+		local ssim = torch.Tensor(2):fill(0)
+
+		l1_err[1] = criterion_l1:forward(doafn_f[1][k], batch_im_out[k])/(3*n_fg)
+		l1_err[2] = criterion_l1:forward(comp_dcgan_per_f[k], batch_im_out[k])/(3*n_fg)
+	
+		ssim[1] = SSIM(doafn_f[1][k]:float(), batch_im_out[k]:float())
+		ssim[2] = SSIM(comp_dcgan_per_f[k]:float(), batch_im_out[k]:float())
+
+		test_output_l1[idx]:copy(l1_err)
+		test_output_ssim[idx]:copy(ssim)
+	end
 
 end
 
---result={}
---result.test_output_l1 = test_output_l1
---result.test_output_ssim = test_output_ssim
---torch.save(string.format('test_output_fg_%s_hol.t7',opt.category),result)
+result={}
+result.test_output_l1 = test_output_l1
+result.test_output_ssim = test_output_ssim
+torch.save(string.format('test_output_%s.t7',opt.category),result)

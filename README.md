@@ -1,9 +1,12 @@
 # Transformation-Grounded Image Generation Network for Novel 3D View Synthesis
-[Eunbyung Park](http://www.cs.unc.edu/~eunbyung/), [Jimei Yang](https://eng.ucmerced.edu/people/jyang44/), [Ersin Yumer](http://www.meyumer.com/), [Duygu Ceylan](http://www.duygu-ceylan.com/), and [Alexander C. Berg](http://acberg.com/), CVPR 2017
+[Eunbyung Park](http://www.cs.unc.edu/~eunbyung/), [Jimei Yang](https://eng.ucmerced.edu/people/jyang44/), [Ersin Yumer](http://www.meyumer.com/), [Duygu Ceylan](http://www.duygu-ceylan.com/), [Alexander C. Berg](http://acberg.com/), CVPR 2017
 
 [[Paper]](http://www.cs.unc.edu/~eunbyung/tvsn/) [[Project Homepage]](http://www.cs.unc.edu/~eunbyung/tvsn/)
 
 Follow below instructions to run and test the codes used in the paper.
+
+## 0. Prerequisites
+[Torch](http://torch.ch/) and [stnbhwd](https://github.com/qassemoquab/stnbhwd)
 
 ## 0. ShapeNet dataset download
 You should have ShapeNetCore.v1 dataset in your local $(SHAPENET_DATA) directory via [shapenet.org](https://shapenet.org/) in your local directory. We will use entire models for car category. For chair category, we used train/test split suggested by appearance flow network paper[[link]](https://github.com/tinghuiz/appearance-flow)(They picked the models that have rich textures).
@@ -117,3 +120,6 @@ We provide pretrained models for car and chair category. You can download it fro
 $(tvsn_root)/tvsn/code/$>th test_tvsn.lua --category car --doafn_path ../snapshots/pretrained/doafn_car_epoch200.t7 --tvsn_path ../snapshots/pretrained/tvsn_car_epoch220.t7
 ```
 You will get some of qualitative results in $(tvsn_root)/tvsn/code/result_car directory.
+
+## Acknowledgments
+Many parts of this code are adopted from other projects ([DCGAN](https://github.com/soumith/dcgan.torch), [Perceptual Loss](https://github.com/jcjohnson/fast-neural-style), [attr2img](https://github.com/xcyan/eccv16_attr2img), [Video Prediction](https://github.com/coupriec/VideoPredictionICLR2016))
